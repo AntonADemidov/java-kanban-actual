@@ -6,11 +6,11 @@ public class Managers {
         return new InMemoryTaskManager();
     }
 
-    public static TaskManager getNewManager(File file) {
+    public static TaskManager getNewFileBackedTasksManager(File file) {
         return new FileBackedTasksManager(file);
     }
 
-    public static TaskManager getSavedManager(File file) throws IOException {
+    public static TaskManager getSavedFileBackedTasksManager(File file) throws IOException {
         return FileBackedTasksManager.loadFromFIle(file);
     }
 
