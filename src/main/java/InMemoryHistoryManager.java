@@ -17,11 +17,27 @@ public class InMemoryHistoryManager implements HistoryManager {
     @Override
     public void remove(Integer id) {
         removeNode(nodeMap.get(id));
+        nodeMap.remove(id);
     }
 
     @Override
     public List<Task> getHistory() {
         return getTasks();
+    }
+
+    @Override
+    public Map<Integer, Node> getNodeMap() {
+        return nodeMap;
+    }
+
+    @Override
+    public Node getFirst() {
+        return first;
+    }
+
+    @Override
+    public Node getLast() {
+        return last;
     }
 
     private void removeNode(Node node) {

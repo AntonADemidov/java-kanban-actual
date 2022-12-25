@@ -1,0 +1,8 @@
+ID,TYPE,NAME,STATUS,START TIME,DURATION,END TIME,DESCRIPTION,EPIC
+1,TASK,Переезд,NEW,2022-11-28T10:00,PT8H,2022-11-28T18:00,cобрать коробки; упаковать кошку; сказать слова прощания
+2,TASK,Покупки,NEW,2022-11-29T10:00,PT45M,2022-11-29T10:45,молоко; кофе; яйца
+3,EPIC,Java developer. Модуль #1,NEW,null,null,null,cпринт #1; cпринт #2
+6,EPIC,Java developer. Модуль #1,IN_PROGRESS,2022-12-12T10:00,PT120H,2022-12-17T10:00,cпринт #3
+7,SUBTASK,Спринт #3,IN_PROGRESS,2022-12-12T10:00,PT120H,2022-12-17T10:00,пройти теорию; создать трекер задач,6
+
+2,7,3
