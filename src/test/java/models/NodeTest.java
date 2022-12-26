@@ -1,5 +1,8 @@
+package models;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import managers.InMemoryTaskManager;
 
 import java.time.Duration;
 import java.time.LocalDateTime;

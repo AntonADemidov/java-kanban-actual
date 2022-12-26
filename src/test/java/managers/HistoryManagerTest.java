@@ -1,5 +1,7 @@
+package managers;
+
+import models.*;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.function.Executable;
 
 import java.time.Duration;
 import java.time.LocalDateTime;

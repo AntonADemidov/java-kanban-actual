@@ -1,3 +1,8 @@
+package managers;
+
+import managers.HistoryManager;
+import models.*;
+
 import java.util.HashMap;
 import java.util.Set;
 

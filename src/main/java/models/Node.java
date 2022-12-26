@@ -1,3 +1,5 @@
+package models;
+
 public class Node {
     private final Task task;
     private Node prev;
