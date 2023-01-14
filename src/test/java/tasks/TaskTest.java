@@ -1,9 +1,13 @@
-package models;
+package tasks;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import managers.InMemoryTaskManager;
+import utilities.Status;
+import utilities.Types;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.Month;
@@ -16,7 +20,7 @@ class TaskTest {
     private static InMemoryTaskManager secondManager;
 
     @BeforeEach
-    public void beforeEach() {
+    public void beforeEach() throws URISyntaxException, IOException, InterruptedException {
         manager = new InMemoryTaskManager();
 
         manager.createTask(new Task(null, Types.TASK,"Переезд", Status.NEW,
@@ -147,7 +151,7 @@ class TaskTest {
     }
 
     @Test
-    void equalsTest() {
+    void equalsTest() throws URISyntaxException, IOException, InterruptedException {
         final Task task1 = manager.getTasks().get(1);
         secondManager = new InMemoryTaskManager();
 
@@ -161,7 +165,7 @@ class TaskTest {
     }
 
     @Test
-    void hashCodeTest() {
+    void hashCodeTest() throws URISyntaxException, IOException, InterruptedException {
         equalsTest();
         assertEquals(manager.getTasks().get(1).hashCode(), secondManager.getTasks().get(1).hashCode(),
                 "HashCode объектов не равны");

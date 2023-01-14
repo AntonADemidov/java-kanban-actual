@@ -1,51 +1,53 @@
 package managers;
 
-import managers.HistoryManager;
-import models.*;
+import history.HistoryManager;
+import tasks.*;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Set;
 
 public interface TaskManager {
-    int createTask(Task task);
+    boolean createTask(Task task) throws URISyntaxException, IOException, InterruptedException;
 
-    int updateTask(Task task, Integer idForAction);
+    boolean updateTask(Task task, Integer idForAction) throws URISyntaxException, IOException, InterruptedException;
 
-    void printTask(Integer idForAction);
+    void printTask(Integer idForAction) throws URISyntaxException, IOException, InterruptedException;
 
-    void deleteTask(Integer idForAction);
+    void deleteTask(Integer idForAction) throws URISyntaxException, IOException, InterruptedException;
 
     void printTaskList();
 
-    void clearTaskList();
+    void clearTaskList() throws URISyntaxException, IOException, InterruptedException;
 
-    int createEpic(Epic epic, Subtask subtask1, Subtask subtask2);
+    boolean createEpic(Epic epic, Subtask subtask1, Subtask subtask2) throws URISyntaxException, IOException, InterruptedException;
 
-    int createEpic(Epic epic, Subtask subtask);
+    boolean createEpic(Epic epic, Subtask subtask) throws URISyntaxException, IOException, InterruptedException;
 
-    int updateEpic(Epic epic, Subtask subtask1, Subtask subtask2, Integer idForAction);
+    boolean updateEpic(Epic epic, Subtask subtask1, Subtask subtask2, Integer idForAction) throws URISyntaxException, IOException, InterruptedException;
 
-    void printEpic(Integer idForAction);
+    void printEpic(Integer idForAction) throws URISyntaxException, IOException, InterruptedException;
 
-    void deleteEpic(Integer idForAction);
+    void deleteEpic(Integer idForAction) throws URISyntaxException, IOException, InterruptedException;
 
     void printEpicList();
 
-    void clearEpicList();
+    void clearEpicList() throws URISyntaxException, IOException, InterruptedException;
 
     void printEpicSubtaskList(Integer idForAction);
 
-    int createSubtask(Subtask subtask, Integer idForAction);
+    boolean createSubtask(Subtask subtask, Integer idForAction) throws URISyntaxException, IOException, InterruptedException;
 
-    int updateSubtask(Subtask subtask, Integer epicIdForAction, Integer subtaskIdForAction);
+    boolean updateSubtask(Subtask subtask, Integer epicIdForAction, Integer subtaskIdForAction) throws URISyntaxException, IOException, InterruptedException;
 
-    void printSubtask(Integer idForAction);
+    void printSubtask(Integer idForAction) throws URISyntaxException, IOException, InterruptedException;
 
-    void deleteSubtask(Integer idForAction);
+    void deleteSubtask(Integer idForAction) throws URISyntaxException, IOException, InterruptedException;
 
     void printSubtaskList();
 
-    void clearSubtaskList();
+    void clearSubtaskList() throws URISyntaxException, IOException, InterruptedException;
 
     void getHistory();
 
@@ -55,7 +57,7 @@ public interface TaskManager {
 
     HashMap<Integer, Subtask> getSubtasks();
 
-    public HashMap<Integer, Epic> getEpics();
+    HashMap<Integer, Epic> getEpics();
 
     HistoryManager getHistoryManager();
 

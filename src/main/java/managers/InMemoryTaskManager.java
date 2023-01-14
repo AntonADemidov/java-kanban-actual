@@ -1,8 +1,12 @@
 package managers;
 
-import models.*;
+import history.HistoryManager;
+import tasks.*;
 import utilities.Managers;
+import utilities.Status;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -38,20 +42,21 @@ public class InMemoryTaskManager implements TaskManager {
     });
 
     @Override
-    public int createTask(Task task) {
+    public boolean createTask(Task task) throws URISyntaxException, IOException, InterruptedException {
         if (createOrNot(task, prioritizedList)) {
             task.setId(++this.idCounter);
             tasks.put(task.getId(), task);
             prioritizedList.add(task);
-            System.out.printf("Задача с id # %d создана.%n", task.getId());
+            System.out.printf("%sЗадача с id # %d создана.%n", empty, task.getId());
+            return true;
         } else {
             System.out.println("Задача не создана - пересечение по времени c одной из задач/подзадач в списке.");
+            return false;
         }
-        return task.getId();
     }
 
     @Override
-    public int updateTask(Task task, Integer idForAction) {
+    public boolean updateTask(Task task, Integer idForAction) throws URISyntaxException, IOException, InterruptedException {
         HashSet<Task> localPrioritizedList = new HashSet<>(prioritizedList);
         localPrioritizedList.remove(tasks.get(idForAction));
 
@@ -63,25 +68,26 @@ public class InMemoryTaskManager implements TaskManager {
             prioritizedList.remove(deletedTask);
             prioritizedList.add(task);
             System.out.printf("Задача с id # %d обновлена.%n", idForAction);
+            return true;
         } else {
-            System.out.println("Задача не создана - пересечение по времени c одной из задач/подзадач в списке.");
+            System.out.println("Задача не обновлена - пересечение по времени c одной из задач/подзадач в списке.");
+            return false;
         }
-        return task.getId();
     }
 
     @Override
-    public void printTask(Integer idForAction) {
+    public void printTask(Integer idForAction) throws URISyntaxException, IOException, InterruptedException {
         System.out.printf("%sЗАДАЧА С ID # %d:%n", empty, idForAction);
         System.out.println(tasks.get(idForAction));
         historyManager.add(tasks.get(idForAction));
     }
 
     @Override
-    public void deleteTask(Integer idForAction) {
-            Task deletedTask = tasks.remove(idForAction);
-            historyManager.remove(idForAction);
-            prioritizedList.remove(deletedTask);
-            System.out.printf("Задача с id # %d удалена.%n", idForAction);
+    public void deleteTask(Integer idForAction) throws URISyntaxException, IOException, InterruptedException {
+        Task deletedTask = tasks.remove(idForAction);
+        historyManager.remove(idForAction);
+        prioritizedList.remove(deletedTask);
+        System.out.printf("Задача с id # %d удалена.%n", idForAction);
     }
 
     @Override
@@ -99,7 +105,7 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public void clearTaskList() {
+    public void clearTaskList() throws URISyntaxException, IOException, InterruptedException {
         if (tasks.size() != 0) {
             for (Task task : tasks.values()) {
                 historyManager.remove(task.getId());
@@ -113,7 +119,7 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public int createEpic(Epic epic, Subtask subtask1, Subtask subtask2) {
+    public boolean createEpic(Epic epic, Subtask subtask1, Subtask subtask2) throws URISyntaxException, IOException, InterruptedException {
         List<Integer> subtaskIds = new ArrayList<>();
         epic.setId(++this.idCounter);
 
@@ -134,16 +140,17 @@ public class InMemoryTaskManager implements TaskManager {
             for (Integer id : subtaskIds) {
                 System.out.printf("Подзадача c id # %d создана в эпике с id # %d.%n", id, epic.getId());
             }
+            return true;
         } else {
             System.out.println("Эпик не создан - пересечение связанных подзадач по времени с другими задачами" +
                     " или подзадачами.");
             --this.idCounter;
+            return false;
         }
-        return epic.getId();
     }
 
     @Override
-    public int createEpic(Epic epic, Subtask subtask) {
+    public boolean createEpic(Epic epic, Subtask subtask) throws URISyntaxException, IOException, InterruptedException {
         List<Integer> subtaskIds = new ArrayList<>();
         epic.setId(++this.idCounter);
 
@@ -159,37 +166,53 @@ public class InMemoryTaskManager implements TaskManager {
             for (Integer id : subtaskIds) {
                 System.out.printf("Подзадача c id # %d создана в эпике с id # %d.%n", id, epic.getId());
             }
+            return true;
         } else {
             System.out.println("Эпик не создан - пересечение связанных подзадач по времени с другими задачами" +
                     " или подзадачами.");
             --this.idCounter;
+            return false;
         }
-        return epic.getId();
     }
 
     @Override
-    public int updateEpic(Epic epic, Subtask subtask1, Subtask subtask2, Integer idForAction) {
+    public boolean updateEpic(Epic epic, Subtask subtask1, Subtask subtask2, Integer idForAction) throws URISyntaxException, IOException, InterruptedException {
         List<Integer> subtaskIds = epics.get(idForAction).getSubtaskIds();
         int updateCounter = 0;
         Set<Task> localPrioritizedList = new HashSet<>(prioritizedList);
         List<Integer> localSubtaskIds = new ArrayList<>(epics.get(idForAction).getSubtaskIds());
 
         epic.setId(idForAction);
+        Subtask currentDeletion;
         if (localSubtaskIds.size() != 0) {
             for (Integer id : localSubtaskIds) {
-                localPrioritizedList.remove(subtasks.get(id));
+                currentDeletion = subtasks.get(id);
+                localPrioritizedList.remove(currentDeletion);
 
                 if (createOrNot(subtask1, localPrioritizedList)) {
                     updateEpic(id, idForAction, subtask1, epic, localPrioritizedList);
                     updateCounter++;
+                } else {
+                    localPrioritizedList.add(currentDeletion);
                 }
+            }
+        }
+
+        localSubtaskIds = new ArrayList<>(epics.get(idForAction).getSubtaskIds());
+        if (localSubtaskIds.size() != 0) {
+            for (Integer id : localSubtaskIds) {
+                currentDeletion = subtasks.get(id);
+                localPrioritizedList.remove(currentDeletion);
 
                 if (createOrNot(subtask2, localPrioritizedList)) {
                     updateEpic(id, idForAction, subtask2, epic, localPrioritizedList);
                     updateCounter++;
+                } else {
+                    localPrioritizedList.add(currentDeletion);
                 }
             }
         }
+
 
         if (updateCounter != 0) {
             historyManager.remove(epics.get(idForAction).getId());
@@ -200,22 +223,23 @@ public class InMemoryTaskManager implements TaskManager {
             for (Integer id : subtaskIds) {
                 System.out.printf("Подзадача c id # %d.%n", id);
             }
+            return true;
         } else {
             System.out.println("Эпик не обновлен - пересечение связанных подзадач по времени с другими задачами" +
                     " или подзадачами.");
+            return false;
         }
-        return epic.getId();
     }
 
     @Override
-    public void printEpic(Integer idForAction) {
+    public void printEpic(Integer idForAction) throws URISyntaxException, IOException, InterruptedException {
         System.out.printf("%sЭПИК С ID # %d:%n", empty, idForAction);
         System.out.println(epics.get(idForAction));
         historyManager.add(epics.get(idForAction));
     }
 
     @Override
-    public void deleteEpic(Integer idForAction) {
+    public void deleteEpic(Integer idForAction) throws URISyntaxException, IOException, InterruptedException {
         ArrayList<Integer> deletedList = new ArrayList<>();
 
         for (Integer id : epics.get(idForAction).getSubtaskIds()) {
@@ -249,7 +273,7 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public void clearEpicList() {
+    public void clearEpicList() throws URISyntaxException, IOException, InterruptedException {
         if (epics.size() != 0) {
             for (Epic epic : epics.values()) {
                 historyManager.remove(epic.getId());
@@ -277,7 +301,7 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public int createSubtask(Subtask subtask, Integer idForAction) {
+    public boolean createSubtask(Subtask subtask, Integer idForAction) throws URISyntaxException, IOException, InterruptedException {
         if (createOrNot(subtask, prioritizedList)) {
             addSubtask(subtask, idForAction);
             epics.get(idForAction).getSubtaskIds().add(subtask.getId());
@@ -286,14 +310,15 @@ public class InMemoryTaskManager implements TaskManager {
             System.out.printf("Эпик c id # %d обновлен.%n", epics.get(idForAction).getId());
             System.out.printf("Подзадача c id # %d создана в эпике с id # %d.%n", subtask.getId(),
                         epics.get(idForAction).getId());
+            return true;
         } else {
             System.out.println("Подзадача не создана - пересечение по времени c одной из задач или подзадач в списке.");
+            return false;
         }
-        return subtask.getId();
     }
 
     @Override
-    public int updateSubtask(Subtask subtask, Integer epicIdForAction, Integer subtaskIdForAction) {
+    public boolean updateSubtask(Subtask subtask, Integer epicIdForAction, Integer subtaskIdForAction) throws URISyntaxException, IOException, InterruptedException {
         Subtask deletedSubtask = subtasks.remove(subtaskIdForAction);
         prioritizedList.remove(deletedSubtask);
 
@@ -311,6 +336,7 @@ public class InMemoryTaskManager implements TaskManager {
 
             System.out.printf("Подзадача c id # %d обновлена.%n", subtaskIdForAction);
             System.out.printf("Эпик c id # %d обновлён.%n", epicIdForAction);
+            return true;
         } else {
             System.out.printf("Эпик c id # %d не обновлен.%n", epicIdForAction);
             System.out.printf("Подзадача c id # %d не обновлена " +
@@ -318,19 +344,19 @@ public class InMemoryTaskManager implements TaskManager {
 
             subtasks.put(deletedSubtask.getId(), deletedSubtask);
             prioritizedList.add(deletedSubtask);
+            return false;
         }
-        return subtask.getId();
     }
 
     @Override
-    public void printSubtask(Integer idForAction) {
+    public void printSubtask(Integer idForAction) throws URISyntaxException, IOException, InterruptedException {
         System.out.printf("%sПОДЗАДАЧА С ID # %d:%n", empty, idForAction);
         System.out.println(subtasks.get(idForAction));
         historyManager.add(subtasks.get(idForAction));
     }
 
     @Override
-    public void deleteSubtask(Integer idForAction) {
+    public void deleteSubtask(Integer idForAction) throws URISyntaxException, IOException, InterruptedException {
         Integer key = subtasks.get(idForAction).getEpicId();
         epics.get(key).getSubtaskIds().remove(idForAction);
         historyManager.remove(subtasks.get(idForAction).getId());
@@ -355,7 +381,7 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public void clearSubtaskList() {
+    public void clearSubtaskList() throws URISyntaxException, IOException, InterruptedException {
         if (subtasks.size() != 0) {
             for (Subtask data : subtasks.values()) {
                 historyManager.remove(data.getId());
@@ -495,7 +521,7 @@ public class InMemoryTaskManager implements TaskManager {
                 }
 
                 boolean rule2;
-                if ((newTaskEndTime!= null) && (elementStartTime != null)) {
+                if ((newTaskEndTime != null) && (elementStartTime != null)) {
                     rule2 = newTaskEndTime.isBefore(elementStartTime);
                 } else {
                     if ((elementStartTime == null)) {

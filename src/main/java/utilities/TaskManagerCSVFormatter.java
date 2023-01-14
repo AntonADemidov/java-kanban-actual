@@ -1,7 +1,7 @@
 package utilities;
 
-import models.*;
-import managers.HistoryManager;
+import tasks.*;
+import history.HistoryManager;
 
 import java.time.Duration;
 import java.time.LocalDateTime;

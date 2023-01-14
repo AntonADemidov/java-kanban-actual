@@ -1,7 +1,7 @@
-package managers;
+package history;
 
-import models.Task;
-import models.Node;
+import tasks.Task;
+import utilities.Node;
 
 import java.util.List;
 import java.util.Map;

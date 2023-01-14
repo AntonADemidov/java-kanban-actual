@@ -1,31 +1,28 @@
-package managers;
-
+import managers.HttpTaskManager;
+import servers.KVServer;
 import tasks.*;
-import utilities.*;
+import utilities.Managers;
+import utilities.Status;
+import utilities.Types;
 
-import java.io.*;
+import java.io.IOException;
+import java.net.URI;
 import java.net.URISyntaxException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.Month;
-import java.util.*;
+import java.util.Scanner;
 
-public class FileBackedTasksManager extends InMemoryTaskManager {
-    private File file;
-    public FileBackedTasksManager(File file) {
-        this.file = file;
-    }
-
-    public FileBackedTasksManager(){
-    }
-
+public class Main {
     public static void main(String[] args) throws IOException, URISyntaxException, InterruptedException {
         Scanner scanner = new Scanner(System.in);
-        File currentStatus = new File("src/main/resources/CurrentStatus.csv");
-        TaskManager manager = Managers.getNewFileBackedTasksManager(currentStatus);
         Integer idForAction;
+
+        KVServer kvServer = new KVServer();
+        kvServer.start();
+
+        URI uri = URI.create("http://localhost:8078");
+        HttpTaskManager manager = Managers.getHttpTaskManager(uri);
 
         printInfo();
         int userCommand = Integer.parseInt(scanner.next());
@@ -115,10 +112,10 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
                                         null,null,null,
                                         "спринт #3; спринт #4", null),
                                 new Subtask(null, null, Types.SUBTASK,"Спринт #3", Status.DONE,
-                                        LocalDateTime.of(2022, Month.DECEMBER, 19, 10, 00),
+                                        LocalDateTime.of(2022, Month.DECEMBER, 12, 10, 00),
                                         Duration.ofMinutes(7200),"пройти теорию; создать трекер задач"),
                                 new Subtask(null, null, Types.SUBTASK,"Спринт #4", Status.NEW,
-                                        LocalDateTime.of(2022, Month.DECEMBER, 26, 10, 00),
+                                        LocalDateTime.of(2022, Month.DECEMBER, 19, 10, 00),
                                         Duration.ofMinutes(7200),"пройти теорию; доработать трекер задач"),
                                 idForAction);
                     } else {
@@ -191,8 +188,8 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
                     if ((manager.getEpics().get(epicIdForAction) != null) &&
                             (manager.getSubtasks().get(subtaskIdForAction) != null)) {
                         manager.updateSubtask(new Subtask(null, null, Types.SUBTASK,"Спринт #3", Status.DONE,
-                                LocalDateTime.of(2022, Month.DECEMBER, 12, 10, 00),
-                                Duration.ofMinutes(7200),"пройти теорию; создать трекер задач"),
+                                        LocalDateTime.of(2022, Month.DECEMBER, 12, 10, 00),
+                                        Duration.ofMinutes(7200),"пройти теорию; создать трекер задач"),
                                 epicIdForAction, subtaskIdForAction);
                     } else {
                         System.out.println("Указанные эпик или подзадача не существуют.");
@@ -238,18 +235,8 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
                     break;
 
                 case 22:
-                    try {
-                        if (currentStatus == null) {
-                            throw new ManagerSaveException("Объект класса File для сохранения информации не инициализирован.");
-                        } else {
-                            manager = Managers.getSavedFileBackedTasksManager(currentStatus);
-                        }
-                    } catch (ManagerSaveException e) {
-                        System.out.println(e.getMessage());
-                    } catch (IOException e) {
-                        System.out.println("Произошла неизвестная проверяемая ошибка ввода-вывода класса IOException.");
-                        e.printStackTrace();
-                    }
+                    manager = Managers.getHttpTaskManager(uri);
+                    manager.load();
                     break;
 
                 default:
@@ -259,8 +246,8 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
             printInfo();
             userCommand = Integer.parseInt(scanner.next());
         }
+        kvServer.stop();
     }
-
     public static void printInfo() {
         int counter = 0;
 
@@ -290,264 +277,12 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
 
         System.out.println(++counter + " - Просмотреть историю просмотров задач, подзадач и эпиков.");
         System.out.println(++counter + " - Просмотреть список всех задач, подзадач и эпиков в порядке приоритета.");
-        System.out.println(++counter + " - Восстановить ТРЕКЕР ЗАДАЧ из файла.");
+        System.out.println(++counter + " - Восстановить ТРЕКЕР ЗАДАЧ c сервера KVServer.");
 
         System.out.println("0 - Завершить тесты.");
         System.out.print("ВВЕДИТЕ КОМАНДУ: ");
     }
-
-    public static FileBackedTasksManager loadFromFIle(File file) throws IOException, ManagerSaveException {
-        FileBackedTasksManager tasksManager = new FileBackedTasksManager(file);
-        String csv = Files.readString(Path.of(String.valueOf(file)));
-        String[] lines = csv.split("\n");
-        List<Integer> history = Collections.emptyList();
-        int idCounter = 0;
-
-        for (int i = 1; i < (lines.length); i++) {
-            String line = lines[i];
-
-            if (line.isEmpty()) {
-                history = TaskManagerCSVFormatter.createHistoryFromString(lines[i + 1]);
-                break;
-            } else {
-                Task task = TaskManagerCSVFormatter.fromString(line);
-                int id = task.getId();
-
-                if (id > idCounter) {
-                    idCounter = id;
-                }
-
-                if (task.getType().equals(Types.TASK)) {
-                    tasksManager.loadTask(task);
-                } else if (task.getType().equals(Types.EPIC)) {
-                    tasksManager.loadEpic((Epic) task);
-                } else {
-                    tasksManager.loadSubtask((Subtask) task);
-                }
-            }
-        }
-
-        for (Map.Entry<Integer, Subtask> entry : tasksManager.getSubtasks().entrySet()) {
-            Subtask subtask = entry.getValue();
-            Epic epic = tasksManager.getEpics().get(subtask.getEpicId());
-            epic.getSubtaskIds().add(subtask.getId());
-        }
-
-        for (Integer taskId : history) {
-            tasksManager.getHistoryManager().add(tasksManager.findTask(taskId, tasksManager));
-            tasksManager.save();
-        }
-
-        tasksManager.setIdCounter(idCounter);
-        System.out.println("СТАТУС ТРЕКЕРА ВОССТАНОВЛЕН ИЗ ФАЙЛА.");
-        return tasksManager;
-    }
-
-    private Task findTask (Integer id, FileBackedTasksManager tasksManager) {
-        if (tasksManager.getTasks().get(id) != null) {
-            return tasksManager.getTasks().get(id);
-        } else if (tasksManager.getSubtasks().get(id) != null) {
-            return tasksManager.getSubtasks().get(id);
-        } else {
-            return tasksManager.getEpics().get(id);
-        }
-    }
-
-    private void save() {
-        try {
-            if (file == null) {
-                throw new ManagerSaveException("Объект класса File для сохранения информации не инициализирован");
-            } else {
-                try (BufferedWriter br = new BufferedWriter(new FileWriter(file))) {
-                    br.write(TaskManagerCSVFormatter.getHeader() + empty);
-
-                    for (Task task : super.getTasks().values()) {
-                        br.write(TaskManagerCSVFormatter.toString(task) + empty);
-                    }
-
-                    for (Epic epic : super.getEpics().values()) {
-                        br.write(TaskManagerCSVFormatter.toString(epic) + empty);
-                    }
-
-                    for (Subtask subtask : super.getSubtasks().values()) {
-                        br.write(TaskManagerCSVFormatter.toString(subtask) +empty);
-                    }
-                    br.write("" + empty);
-                    br.write(TaskManagerCSVFormatter.toString(super.getHistoryManager()));
-                } catch (IOException e) {
-                    System.out.println("Произошла неизвестная проверяемая ошибка ввода-вывода класса IOException");
-                    e.printStackTrace();
-                } catch (RuntimeException e) {
-                    System.out.println("Произошла неизвестная непроверяемая ошибка класса RuntimeException");
-                    e.printStackTrace();
-                }
-            }
-        } catch (ManagerSaveException e) {
-            System.out.println(e.getMessage());
-        }
-    }
-
-    private void loadTask(Task task) {
-        super.getTasks().put(task.getId(), task);
-        super.getPrioritizedList().add(task);
-        save();
-    }
-
-    private void loadEpic(Epic epic) {
-        super.getEpics().put(epic.getId(), epic);
-        save();
-    }
-
-    private void loadSubtask(Subtask subtask) {
-        super.getSubtasks().put(subtask.getId(), subtask);
-        super.getPrioritizedList().add(subtask);
-        save();
-    }
-
-    @Override
-    public boolean createTask(Task task) throws URISyntaxException, IOException, InterruptedException {
-        boolean successCreation = super.createTask(task);
-        if (successCreation){
-            save();
-        }
-        return successCreation;
-    }
-
-    @Override
-    public boolean updateTask(Task task, Integer idForAction) throws URISyntaxException, IOException, InterruptedException {
-        boolean successCreation = super.updateTask(task, idForAction);
-        if (successCreation) {
-            save();
-        }
-        return successCreation;
-    }
-
-    @Override
-    public void printTask(Integer idForAction) throws URISyntaxException, IOException, InterruptedException {
-        super.printTask(idForAction);
-        save();
-    }
-
-    @Override
-    public void deleteTask(Integer idForAction) throws URISyntaxException, IOException, InterruptedException {
-        super.deleteTask(idForAction);
-        save();
-    }
-
-    @Override
-    public void printTaskList() {
-        super.printTaskList();
-    }
-
-    @Override
-    public void clearTaskList() throws URISyntaxException, IOException, InterruptedException {
-        super.clearTaskList();
-        save();
-    }
-
-    @Override
-    public boolean createEpic(Epic epic, Subtask subtask1, Subtask subtask2) throws URISyntaxException, IOException, InterruptedException {
-        boolean successCreation = super.createEpic(epic, subtask1, subtask2);
-        if (successCreation) {
-            save();
-        }
-        return successCreation;
-    }
-
-    @Override
-    public boolean createEpic(Epic epic, Subtask subtask) throws URISyntaxException, IOException, InterruptedException {
-        boolean successCreation = super.createEpic(epic, subtask);
-        if (successCreation) {
-            save();
-        }
-        return successCreation;
-    }
-
-    @Override
-    public boolean updateEpic(Epic epic, Subtask subtask1, Subtask subtask2, Integer idForAction) throws URISyntaxException, IOException, InterruptedException {
-        boolean successCreation = super.updateEpic(epic, subtask1, subtask2, idForAction);
-        if (successCreation) {
-            save();
-        }
-        return successCreation;
-    }
-
-    @Override
-    public void printEpic(Integer idForAction) throws URISyntaxException, IOException, InterruptedException {
-        super.printEpic(idForAction);
-        save();
-    }
-
-    @Override
-    public void deleteEpic(Integer idForAction) throws URISyntaxException, IOException, InterruptedException {
-        super.deleteEpic(idForAction);
-        save();
-    }
-
-    @Override
-    public void printEpicList() {
-        super.printEpicList();
-    }
-
-    @Override
-    public void clearEpicList() throws URISyntaxException, IOException, InterruptedException {
-        super.clearEpicList();
-        save();
-    }
-
-    @Override
-    public void printEpicSubtaskList(Integer idForAction) {
-        super.printEpicSubtaskList(idForAction);
-    }
-
-    @Override
-    public boolean createSubtask(Subtask subtask, Integer idForAction) throws URISyntaxException, IOException, InterruptedException {
-        boolean successCreation = super.createSubtask(subtask, idForAction);
-        if (successCreation) {
-            save();
-        }
-        return successCreation;
-    }
-
-    @Override
-    public boolean updateSubtask(Subtask subtask, Integer epicIdForAction, Integer subtaskIdForAction) throws URISyntaxException, IOException, InterruptedException {
-        boolean successCreation = super.updateSubtask(subtask, epicIdForAction, subtaskIdForAction);
-        if (successCreation) {
-            save();
-        }
-        return successCreation;
-    }
-
-    @Override
-    public void printSubtask(Integer idForAction) throws URISyntaxException, IOException, InterruptedException {
-        super.printSubtask(idForAction);
-        save();
-    }
-
-    @Override
-    public void deleteSubtask(Integer idForAction) throws URISyntaxException, IOException, InterruptedException {
-        super.deleteSubtask(idForAction);
-        save();
-    }
-
-    @Override
-    public void printSubtaskList() {
-        super.printSubtaskList();
-    }
-
-    @Override
-    public void clearSubtaskList() throws URISyntaxException, IOException, InterruptedException {
-        super.clearSubtaskList();
-        save();
-    }
-
-    @Override
-    public void getHistory() {
-        super.getHistory();
-    }
-
-    @Override
-    public void getPrioritizedTasks() {
-        super.getPrioritizedTasks();
-    }
 }
+
+
+

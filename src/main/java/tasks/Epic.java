@@ -1,4 +1,7 @@
-package models;
+package tasks;
+
+import utilities.Status;
+import utilities.Types;
 
 import java.time.Duration;
 import java.time.LocalDateTime;

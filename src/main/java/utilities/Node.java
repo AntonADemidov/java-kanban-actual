@@ -1,4 +1,6 @@
-package models;
+package utilities;
+
+import tasks.Task;
 
 public class Node {
     private final Task task;

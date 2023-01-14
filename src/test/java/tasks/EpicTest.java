@@ -1,9 +1,13 @@
-package models;
+package tasks;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import managers.InMemoryTaskManager;
+import utilities.Status;
+import utilities.Types;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.Month;
@@ -17,7 +21,7 @@ public class EpicTest {
     private static InMemoryTaskManager secondManager;
 
     @BeforeEach
-    public void beforeEach() {
+    public void beforeEach() throws URISyntaxException, IOException, InterruptedException {
         manager = new InMemoryTaskManager();
 
         manager.createEpic(new Epic(null, Types.EPIC,"Java developer. Модуль #1", null,
@@ -117,7 +121,7 @@ public class EpicTest {
     }
 
     @Test
-    void equalsTest() {
+    void equalsTest() throws URISyntaxException, IOException, InterruptedException {
         final Epic epic1 = manager.getEpics().get(1);
         secondManager = new InMemoryTaskManager();
 
@@ -136,7 +140,7 @@ public class EpicTest {
     }
 
     @Test
-    void hashCodeTest() {
+    void hashCodeTest() throws URISyntaxException, IOException, InterruptedException {
         equalsTest();
         assertEquals(manager.getEpics().get(1).hashCode(), secondManager.getEpics().get(1).hashCode(),
                 "HashCode объектов не равны");

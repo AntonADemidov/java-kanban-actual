@@ -1,7 +1,11 @@
-package managers;
+package history;
 
-import models.*;
+import history.HistoryManager;
+import tasks.*;
 import org.junit.jupiter.api.Test;
+import utilities.Node;
+import utilities.Status;
+import utilities.Types;
 
 import java.time.Duration;
 import java.time.LocalDateTime;

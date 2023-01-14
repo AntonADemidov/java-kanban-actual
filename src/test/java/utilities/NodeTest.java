@@ -1,9 +1,17 @@
-package models;
+package utilities;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import managers.InMemoryTaskManager;
+import tasks.Epic;
+import tasks.Subtask;
+import tasks.Task;
+import utilities.Node;
+import utilities.Status;
+import utilities.Types;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.Month;
@@ -15,7 +23,7 @@ class NodeTest {
     private static InMemoryTaskManager manager;
 
     @BeforeEach
-    public void beforeEach() {
+    public void beforeEach() throws URISyntaxException, IOException, InterruptedException {
         manager = new InMemoryTaskManager();
 
         manager.createTask(new Task(null, Types.TASK,"Переезд", Status.NEW,

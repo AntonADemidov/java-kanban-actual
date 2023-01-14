@@ -1,9 +1,12 @@
 package managers;
 
-import models.EpicTest;
+import tasks.EpicTest;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import java.io.IOException;
+import java.net.URISyntaxException;
 
 class InMemoryTaskManagerTest extends TaskManagerTest<InMemoryTaskManager> {
 
@@ -13,7 +16,7 @@ class InMemoryTaskManagerTest extends TaskManagerTest<InMemoryTaskManager> {
     }
 
     @Test
-    void findEpicStatusTest(){
+    void findEpicStatusTest() throws URISyntaxException, IOException, InterruptedException {
         EpicTest test = new EpicTest();
         test.beforeEach();
         test.twoSubtasksWithStatusNewTest();

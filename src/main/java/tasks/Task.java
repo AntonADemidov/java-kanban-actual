@@ -1,4 +1,7 @@
-package models;
+package tasks;
+
+import utilities.Status;
+import utilities.Types;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -9,8 +12,8 @@ public class Task {
     private final Types type;
     private String name;
     private Status status;
-    private Duration duration;
     private LocalDateTime startTime;
+    private Duration duration;
     private String description;
 
     public Task(Integer id, Types type, String name, Status status, LocalDateTime startTime, Duration duration,

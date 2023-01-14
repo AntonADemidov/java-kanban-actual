@@ -1,10 +1,14 @@
 package utilities;
 
+import history.HistoryManager;
+import history.InMemoryHistoryManager;
 import managers.*;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -32,7 +36,6 @@ class ManagersTest {
         assertNotNull(file, "Файл не инициализирован");
         TaskManager manager = Managers.getSavedFileBackedTasksManager(file);
         assertEquals(manager.getClass(), FileBackedTasksManager.class, "Реализация не совпадает");
-
     }
 
     @Test

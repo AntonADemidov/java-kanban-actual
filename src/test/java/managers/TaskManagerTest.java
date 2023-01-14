@@ -1,8 +1,13 @@
 package managers;
 
-import models.*;
+import history.HistoryManager;
+import tasks.*;
 import org.junit.jupiter.api.Test;
+import utilities.Status;
+import utilities.Types;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.Month;
@@ -11,18 +16,19 @@ import java.util.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-abstract class TaskManagerTest<T extends TaskManager> {
-    T manager;
+public abstract class TaskManagerTest<T extends TaskManager> {
+    public T manager;
 
     @Test
-    void createTaskTest() {
+    void createTaskTest() throws URISyntaxException, IOException, InterruptedException {
         assertEquals(0, manager.getTasks().size(), "Список задач не создавался");
 
         Task task = new Task(null, Types.TASK,"Покупки", Status.NEW,
                 LocalDateTime.of(2022, Month.NOVEMBER, 29, 10,00),
                 Duration.ofMinutes(45),"молоко; кофе; яйца");
 
-        final int taskId = manager.createTask(task);
+        manager.createTask(task);
+        final int taskId = task.getId();
         assertEquals(1, taskId, "значения id не совпадают.");
 
         final Task savedTask = manager.getTasks().get(taskId);
@@ -42,7 +48,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
-    void updateTaskTest() {
+    void updateTaskTest() throws URISyntaxException, IOException, InterruptedException {
         createTaskTest();
 
         Task newTask = new Task(null, Types.TASK,"Покупки", Status.DONE,
@@ -52,7 +58,9 @@ abstract class TaskManagerTest<T extends TaskManager> {
         final int idForAction = 1;
         assertEquals(1, idForAction, "Значения id не совпадают.");
 
-        final int taskId = manager.updateTask(newTask, idForAction);
+        manager.updateTask(newTask, idForAction);
+        final int taskId = newTask.getId();
+
         assertEquals(1, taskId, "Значения id не совпадают.");
 
         final Task savedTask = manager.getTasks().get(taskId);
@@ -72,7 +80,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
-    void printTaskTest() {
+    void printTaskTest() throws URISyntaxException, IOException, InterruptedException {
         createTaskTest();
 
         final int idForAction = 1;
@@ -82,7 +90,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
-    void deleteTaskTest() {
+    void deleteTaskTest() throws URISyntaxException, IOException, InterruptedException {
         createTaskTest();
 
         final int idForAction = 1;
@@ -95,13 +103,13 @@ abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
-    void printTaskListTest() {
+    void printTaskListTest() throws URISyntaxException, IOException, InterruptedException {
         createTaskTest();
-        manager.printSubtaskList();
+        manager.printTaskList();
     }
 
     @Test
-    void clearTaskListTest() {
+    void clearTaskListTest() throws URISyntaxException, IOException, InterruptedException {
         createTaskTest();
 
         manager.clearTaskList();
@@ -111,7 +119,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
-    void createEpicTest1() {
+    void createEpicTest1() throws URISyntaxException, IOException, InterruptedException {
         assertEquals(0, manager.getEpics().size(), "Список эпиков не создавался");
         assertEquals(0, manager.getSubtasks().size(), "Список подзадач не создавался");
 
@@ -126,7 +134,8 @@ abstract class TaskManagerTest<T extends TaskManager> {
                         LocalDateTime.of(2022, Month.DECEMBER, 05, 10, 01),
                         Duration.ofMinutes(7200),"пройти теорию; автоматизировать бухгалтерию");
 
-        final int epicId = manager.createEpic(epic, subtask1, subtask2);
+        manager.createEpic(epic, subtask1, subtask2);
+        final int epicId = epic.getId();
         assertEquals(1, epicId, "значения id не совпадают.");
 
         final Epic savedEpic = manager.getEpics().get(epicId);
@@ -174,7 +183,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
-    void createEpicTest2() {
+    void createEpicTest2() throws URISyntaxException, IOException, InterruptedException {
         assertEquals(0, manager.getEpics().size(), "Список эпиков не создавался");
         assertEquals(0, manager.getSubtasks().size(), "Список подзадач не создавался");
 
@@ -185,7 +194,8 @@ abstract class TaskManagerTest<T extends TaskManager> {
                         LocalDateTime.of(2022, Month.DECEMBER, 12, 10, 00),
                         Duration.ofMinutes(7200),"пройти теорию; создать трекер задач");
 
-        final int epicId = manager.createEpic(epic, subtask);
+        manager.createEpic(epic, subtask);
+        final int epicId = epic.getId();
         assertEquals(1, epicId, "значения id не совпадают.");
 
         final Epic savedEpic = manager.getEpics().get(epicId);
@@ -222,8 +232,8 @@ abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
-    void updateEpicTest() {
-        createEpicTest2();
+    void updateEpicTest() throws URISyntaxException, IOException, InterruptedException {
+        createEpicTest1();
 
         Subtask subtask1 = new Subtask(null, null, Types.SUBTASK,"Спринт #3", Status.DONE,
                 LocalDateTime.of(2022, Month.DECEMBER, 12, 10, 00),
@@ -237,7 +247,8 @@ abstract class TaskManagerTest<T extends TaskManager> {
         assertEquals(1, idForAction, "Значения id не совпадают.");
 
         Epic epic = manager.getEpics().get(idForAction);
-        final int epicId = manager.updateEpic(epic, subtask1, subtask2, idForAction);
+        manager.updateEpic(epic, subtask1, subtask2, idForAction);
+        final int epicId = epic.getId();
         assertEquals(1, epicId, "значения id не совпадают.");
 
         final Epic savedEpic = manager.getEpics().get(epicId);
@@ -252,11 +263,11 @@ abstract class TaskManagerTest<T extends TaskManager> {
 
         final List<Integer> subtaskIds = epic.getSubtaskIds();
         assertEquals(2, subtaskIds.size());
-        assertEquals(3, subtaskIds.get(0));
-        assertEquals(4, subtaskIds.get(1));
+        assertEquals(4, subtaskIds.get(0));
+        assertEquals(5, subtaskIds.get(1));
 
         final int subtaskId1 = subtask1.getId();
-        assertEquals(3, subtaskId1,"Значения id не совпадают.");
+        assertEquals(4, subtaskId1,"Значения id не совпадают.");
         assertEquals(1, subtask1.getEpicId(),"Значения epicId не совпадают.");
 
         final Subtask savedSubtask1 = manager.getSubtasks().get(subtaskId1);
@@ -264,7 +275,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
         assertEquals(subtask1, savedSubtask1, "Подзадачи не совпадают.");
 
         final int subtaskId2 = subtask2.getId();
-        assertEquals(4, subtaskId2,"значения id не совпадают.");
+        assertEquals(5, subtaskId2,"значения id не совпадают.");
         assertEquals(1, subtask1.getEpicId(),"Значения epicId не совпадают.");
 
         final Subtask savedSubtask2 = manager.getSubtasks().get(subtaskId2);
@@ -285,7 +296,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
-    void printEpicTest() {
+    void printEpicTest() throws URISyntaxException, IOException, InterruptedException {
         createEpicTest2();
 
         final int idForAction = 1;
@@ -295,7 +306,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
-    void deleteEpicTest() {
+    void deleteEpicTest() throws URISyntaxException, IOException, InterruptedException {
         createEpicTest2();
 
         final int idForAction = 1;
@@ -309,13 +320,13 @@ abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
-    void printEpicListTest() {
+    void printEpicListTest() throws URISyntaxException, IOException, InterruptedException {
         createEpicTest2();
         manager.printEpicList();
     }
 
     @Test
-    void clearEpicListTest() {
+    void clearEpicListTest() throws URISyntaxException, IOException, InterruptedException {
         createEpicTest2();
 
         manager.clearEpicList();
@@ -326,7 +337,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
-    void printEpicSubtaskListTest() {
+    void printEpicSubtaskListTest() throws URISyntaxException, IOException, InterruptedException {
         createEpicTest2();
 
         final int idForAction = 1;
@@ -336,7 +347,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
-    void createSubtaskTest() {
+    void createSubtaskTest() throws URISyntaxException, IOException, InterruptedException {
         createEpicTest2();
 
         Subtask subtask = new Subtask(null, null, Types.SUBTASK,"Спринт #5", Status.NEW,
@@ -346,7 +357,8 @@ abstract class TaskManagerTest<T extends TaskManager> {
         final int idForAction = 1;
         assertEquals(1, idForAction, "Значения id не совпадают.");
 
-        final int subtaskId = manager.createSubtask(subtask, idForAction);
+        manager.createSubtask(subtask, idForAction);
+        final int subtaskId = subtask.getId();
         assertEquals(3, subtaskId,"Значения id не совпадают.");
         assertEquals(1, subtask.getEpicId(),"Значения epicId не совпадают.");
 
@@ -384,7 +396,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
-    void updateSubtaskTest() {
+    void updateSubtaskTest() throws URISyntaxException, IOException, InterruptedException {
         createEpicTest2();
 
         Subtask subtask = new Subtask(null, null, Types.SUBTASK,"Спринт #3", Status.DONE,
@@ -397,7 +409,8 @@ abstract class TaskManagerTest<T extends TaskManager> {
         final int subtaskIdForAction = 2;
         assertEquals(2, subtaskIdForAction, "Значения id не совпадают.");
 
-        final int subtaskId = manager.updateSubtask(subtask, epicIdForAction, subtaskIdForAction);
+        manager.updateSubtask(subtask, epicIdForAction, subtaskIdForAction);
+        final int subtaskId = subtask.getId();
         assertEquals(2, subtaskId,"Значения id не совпадают.");
         assertEquals(1, subtask.getEpicId(),"Значения epicId не совпадают.");
 
@@ -434,7 +447,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
-    void printSubtaskTest() {
+    void printSubtaskTest() throws URISyntaxException, IOException, InterruptedException {
         createEpicTest2();
 
         final int idForAction = 2;
@@ -445,7 +458,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
-    void deleteSubtaskTest() {
+    void deleteSubtaskTest() throws URISyntaxException, IOException, InterruptedException {
         createEpicTest2();
 
         final int idForAction = 2;
@@ -477,13 +490,13 @@ abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
-    void printSubtaskListTest() {
+    void printSubtaskListTest() throws URISyntaxException, IOException, InterruptedException {
         createEpicTest1();
         manager.printSubtaskList();
     }
 
     @Test
-    void clearSubtaskListTest() {
+    void clearSubtaskListTest() throws URISyntaxException, IOException, InterruptedException {
         createEpicTest2();
         manager.clearSubtaskList();
 
@@ -505,7 +518,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
-    void getHistoryTest() {
+    void getHistoryTest() throws URISyntaxException, IOException, InterruptedException {
         createEpicTest1();
 
         manager.printSubtask(3);
@@ -524,13 +537,13 @@ abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
-    void getPrioritizedTasksTest() {
+    void getPrioritizedTasksTest() throws URISyntaxException, IOException, InterruptedException {
         createEpicTest1();
         manager.getPrioritizedTasks();
     }
 
     @Test
-    void getTasksTest() {
+    void getTasksTest() throws URISyntaxException, IOException, InterruptedException {
         HashMap<Integer, Task> tasks = manager.getTasks();
         assertEquals(0, tasks.size(), "Неправильный размер истории.");
 
@@ -540,7 +553,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
-    void getSubtasksTest() {
+    void getSubtasksTest() throws URISyntaxException, IOException, InterruptedException {
         HashMap<Integer, Subtask> subtasks = manager.getSubtasks();
         assertEquals(0, subtasks.size(), "Неправильный размер истории.");
 
@@ -551,7 +564,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
-    void getEpicsTest() {
+    void getEpicsTest() throws URISyntaxException, IOException, InterruptedException {
         HashMap<Integer, Epic> epics = manager.getEpics();
         assertEquals(0, epics.size(), "Неправильный размер истории.");
 
@@ -561,7 +574,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
-    void getHistoryManagerTest() {
+    void getHistoryManagerTest() throws URISyntaxException, IOException, InterruptedException {
         HistoryManager historyManager = manager.getHistoryManager();
         assertEquals(0, historyManager.getNodeMap().size(), "Неправильный размер истории.");
         assertNull(historyManager.getFirst(), "Неправильный размер истории.");
@@ -580,7 +593,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
-    void getPrioritizedListTest() {
+    void getPrioritizedListTest() throws URISyntaxException, IOException, InterruptedException {
         Set<Task> localPrioritizedList = new HashSet<>(manager.getPrioritizedList());
         assertEquals(0, localPrioritizedList.size(), "Неправильный размер списка.");
 

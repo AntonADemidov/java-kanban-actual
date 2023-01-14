@@ -1,0 +1,9 @@
+ID,TYPE,NAME,STATUS,START TIME,DURATION,END TIME,DESCRIPTION,EPIC
+1,TASK,Переезд,NEW,2022-11-28T10:00,PT8H,2022-11-28T18:00,собрать коробки; упаковать кошку; сказать слова прощания
+2,EPIC,Java developer. Модуль #1,DONE,2022-11-30T10:00,PT240H,2022-12-10T10:01,спринт #1; спринт #2
+5,EPIC,TestEpicName,DONE,2023-01-12T10:00,PT8H,2023-01-12T18:00,TestEpicDescription
+3,SUBTASK,Спринт #1,DONE,2022-11-30T10:00,PT120H,2022-12-05T10:00,пройти теорию; создать счетчик калорий,2
+4,SUBTASK,Спринт #2,DONE,2022-12-05T10:01,PT120H,2022-12-10T10:01,пройти теорию; автоматизировать бухгалтерию,2
+6,SUBTASK,TestSubtaskName1,DONE,2023-01-12T10:00,PT8H,2023-01-12T18:00,TestSubtaskDescription1,5
+
+4,1,2,3
