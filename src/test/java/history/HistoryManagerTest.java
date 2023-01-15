@@ -1,6 +1,6 @@
 package history;
 
-import history.HistoryManager;
+import org.junit.jupiter.api.BeforeEach;
 import tasks.*;
 import org.junit.jupiter.api.Test;
 import utilities.Node;
@@ -16,29 +16,37 @@ import static org.junit.jupiter.api.Assertions.*;
 
 abstract class HistoryManagerTest<T extends HistoryManager> {
     T historyManager;
+    private Task task1;
+    private Task task2;
+    private Task task3;
+    private Subtask subtask;
+    private Epic epic;
 
-    @Test
-    void addTest() {
-        final Task task1 = new Task(1, Types.TASK,"Переезд", Status.NEW,
+    @BeforeEach
+    void setTasks() {
+        task1 = new Task(1, Types.TASK,"Переезд", Status.NEW,
                 LocalDateTime.of(2022, Month.NOVEMBER, 28, 10,00),
                 Duration.ofMinutes(480),"собрать коробки; упаковать кошку; сказать слова прощания");
 
-        final Task task2 = new Task(2, Types.TASK,"Покупки", Status.NEW,
+        task2 = new Task(2, Types.TASK,"Покупки", Status.NEW,
                 LocalDateTime.of(2022, Month.NOVEMBER, 29, 10,00),
                 Duration.ofMinutes(45),"молоко; кофе; яйца");
 
-        final Task task3 = new Task(3, Types.TASK,"Покупки", Status.DONE,
+        task3 = new Task(3, Types.TASK,"Покупки", Status.DONE,
                 LocalDateTime.of(2022, Month.NOVEMBER, 30, 10,00),
                 Duration.ofMinutes(60),"молоко; кофе; яйца; хлеб");
 
-        final Subtask subtask = new Subtask(5, 4, Types.SUBTASK,"Спринт #3", Status.IN_PROGRESS,
+        subtask = new Subtask(5, 4, Types.SUBTASK,"Спринт #3", Status.IN_PROGRESS,
                 LocalDateTime.of(2022, Month.DECEMBER, 12, 10, 00),
                 Duration.ofMinutes(7200),"пройти теорию; создать трекер задач");
 
-        final Epic epic = new Epic(4,Types.EPIC,"Java developer. Модуль #1",Status.IN_PROGRESS,
+        epic = new Epic(4,Types.EPIC,"Java developer. Модуль #1",Status.IN_PROGRESS,
                 subtask.getStartTime(), subtask.getDuration(), subtask.getEndTime(),
                 "спринт #3", Collections.singletonList(5));
+    }
 
+    @Test
+    void addTest() {
         Map<Integer, Node> nodeMap = historyManager.getNodeMap();
         assertEquals(0, nodeMap.size(), "Неправильный размер истории.");
         assertNull(historyManager.getFirst(), "Неправильный размер истории.");

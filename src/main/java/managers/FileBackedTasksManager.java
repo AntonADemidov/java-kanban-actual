@@ -25,7 +25,6 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         Scanner scanner = new Scanner(System.in);
         File currentStatus = new File("src/main/resources/CurrentStatus.csv");
         TaskManager manager = Managers.getNewFileBackedTasksManager(currentStatus);
-        Integer idForAction;
 
         printInfo();
         int userCommand = Integer.parseInt(scanner.next());
@@ -33,52 +32,19 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         while (userCommand != 0) {
             switch (userCommand) {
                 case 1:
-                    manager.createTask(new Task(null, Types.TASK,"Переезд", Status.NEW,
-                            LocalDateTime.of(2022, Month.NOVEMBER, 28, 10,00),
-                            Duration.ofMinutes(480),"собрать коробки; упаковать кошку; сказать слова прощания"));
-
-                    manager.createTask(new Task(null, Types.TASK,"Покупки", Status.NEW,
-                            LocalDateTime.of(2022, Month.NOVEMBER, 29, 10,00),
-                            Duration.ofMinutes(45),"молоко; кофе; яйца"));
+                    case1(manager);
                     break;
 
                 case 2:
-                    if (manager.getTasks().size() != 0) {
-                        System.out.print("Введите id задачи для обновления: ");
-                        idForAction = Integer.parseInt(scanner.next());
-
-                        if ((manager.getTasks().containsKey(idForAction)) && (manager.getTasks().get(idForAction) != null)) {
-                            manager.updateTask(new Task(null, Types.TASK,"Покупки", Status.DONE,
-                                    LocalDateTime.of(2022, Month.NOVEMBER, 29, 10,00),
-                                    Duration.ofMinutes(60),"молоко; кофе; яйца; хлеб"), idForAction);
-                        } else {
-                            System.out.printf("Задача с id # %d не существует.%n", idForAction);
-                        }
-                    } else {
-                        System.out.println("Список задач пуст => нечего обновлять.");
-                    }
+                    case2(manager, scanner);
                     break;
 
                 case 3:
-                    System.out.print("Введите id задачи для отображения: ");
-                    idForAction = Integer.parseInt(scanner.next());
-
-                    if (manager.getTasks().containsKey(idForAction)) {
-                        manager.printTask(idForAction);
-                    } else {
-                        System.out.printf("Задача с id # %d не существует.%n", idForAction);
-                    }
+                    case3(manager, scanner);
                     break;
 
                 case 4:
-                    System.out.print("Введите id задачи для удаления: ");
-                    idForAction = Integer.parseInt(scanner.next());
-
-                    if (manager.getTasks().containsKey(idForAction)) {
-                        manager.deleteTask(idForAction);
-                    } else {
-                        System.out.printf("Задача с id # %d не существует.%n", idForAction);
-                    }
+                    case4(manager, scanner);
                     break;
 
                 case 5:
@@ -90,62 +56,19 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
                     break;
 
                 case 7:
-                    manager.createEpic(new Epic(null, Types.EPIC,"Java developer. Модуль #1", null,
-                                    null,null, null,"спринт #1; спринт #2", null),
-                            new Subtask(null, null, Types.SUBTASK,"Спринт #1", Status.DONE,
-                                    LocalDateTime.of(2022, Month.NOVEMBER, 30, 10, 00),
-                                    Duration.ofMinutes(7200),"пройти теорию; создать счетчик калорий"),
-                            new Subtask(null, null, Types.SUBTASK,"Спринт #2", Status.DONE,
-                                    LocalDateTime.of(2022, Month.DECEMBER, 05, 10, 01),
-                                    Duration.ofMinutes(7200),"пройти теорию; автоматизировать бухгалтерию"));
-
-                    manager.createEpic(new Epic(null, Types.EPIC,"Java developer. Модуль #1",null,
-                                    null,null,null,"спринт #3", null),
-                            new Subtask(null, null, Types.SUBTASK,"Спринт #3", Status.IN_PROGRESS,
-                                    LocalDateTime.of(2022, Month.DECEMBER, 12, 10, 00),
-                                    Duration.ofMinutes(7200),"пройти теорию; создать трекер задач"));
+                    case7(manager);
                     break;
 
                 case 8:
-                    System.out.print("Введите id эпика для обновления: ");
-                    idForAction = Integer.parseInt(scanner.next());
-
-                    if (manager.getEpics().containsKey(idForAction)) {
-                        manager.updateEpic(new Epic(null, Types.EPIC, "Java developer. Модуль #1", null,
-                                        null,null,null,
-                                        "спринт #3; спринт #4", null),
-                                new Subtask(null, null, Types.SUBTASK,"Спринт #3", Status.DONE,
-                                        LocalDateTime.of(2022, Month.DECEMBER, 19, 10, 00),
-                                        Duration.ofMinutes(7200),"пройти теорию; создать трекер задач"),
-                                new Subtask(null, null, Types.SUBTASK,"Спринт #4", Status.NEW,
-                                        LocalDateTime.of(2022, Month.DECEMBER, 26, 10, 00),
-                                        Duration.ofMinutes(7200),"пройти теорию; доработать трекер задач"),
-                                idForAction);
-                    } else {
-                        System.out.printf("Эпик c id # %d не существует.%n", idForAction);
-                    }
+                    case8(manager, scanner);
                     break;
 
                 case 9:
-                    System.out.print("Введите id эпика для отображения: ");
-                    idForAction = Integer.parseInt(scanner.next());
-
-                    if (manager.getEpics().containsKey(idForAction)) {
-                        manager.printEpic(idForAction);
-                    } else {
-                        System.out.printf("Эпик с id # %d не существует.%n", idForAction);
-                    }
+                    case9(manager, scanner);
                     break;
 
                 case 10:
-                    System.out.print("Введите id эпика для удаления: ");
-                    idForAction = Integer.parseInt(scanner.next());
-
-                    if (manager.getEpics().containsKey(idForAction)) {
-                        manager.deleteEpic(idForAction);
-                    } else {
-                        System.out.printf("Эпик c id # %d не существует.%n", idForAction);
-                    }
+                    case10(manager, scanner);
                     break;
 
                 case 11:
@@ -157,68 +80,23 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
                     break;
 
                 case 13:
-                    System.out.print("Введите id эпика: ");
-                    idForAction = Integer.parseInt(scanner.next());
-
-                    if ((manager.getEpics().get(idForAction) != null) &&
-                            (manager.getEpics().get(idForAction).getSubtaskIds() != null)) {
-                        manager.printEpicSubtaskList(idForAction);
-                    } else {
-                        System.out.println("Список подзадач пуст.");
-                    }
+                    case13(manager, scanner);
                     break;
 
                 case 14:
-                    System.out.print("Введите id эпика для добавления новой подзадачи: ");
-                    idForAction = Integer.parseInt(scanner.next());
-
-                    if (manager.getEpics().get(idForAction) != null) {
-                        manager.createSubtask(new Subtask(null, null, Types.SUBTASK,"Спринт #5", Status.NEW,
-                                LocalDateTime.of(2022, Month.DECEMBER, 26, 10, 00),
-                                Duration.ofMinutes(7200),"пройти теорию; снова доработать трекер задач"), idForAction);
-                    } else {
-                        System.out.printf("Эпик с id # %d не существует.%n", idForAction);
-                    }
+                    case14(manager, scanner);
                     break;
 
                 case 15:
-                    System.out.print("Введите id эпика: ");
-                    Integer epicIdForAction = Integer.parseInt(scanner.next());
-
-                    System.out.print("Введите id задачи для обновления: ");
-                    Integer subtaskIdForAction = Integer.parseInt(scanner.next());
-
-                    if ((manager.getEpics().get(epicIdForAction) != null) &&
-                            (manager.getSubtasks().get(subtaskIdForAction) != null)) {
-                        manager.updateSubtask(new Subtask(null, null, Types.SUBTASK,"Спринт #3", Status.DONE,
-                                LocalDateTime.of(2022, Month.DECEMBER, 12, 10, 00),
-                                Duration.ofMinutes(7200),"пройти теорию; создать трекер задач"),
-                                epicIdForAction, subtaskIdForAction);
-                    } else {
-                        System.out.println("Указанные эпик или подзадача не существуют.");
-                    }
+                    case15(manager, scanner);
                     break;
 
                 case 16:
-                    System.out.print("Введите id позадачи для отображения: ");
-                    idForAction = Integer.parseInt(scanner.next());
-
-                    if (manager.getSubtasks().containsKey(idForAction)) {
-                        manager.printSubtask(idForAction);
-                    } else {
-                        System.out.printf("Задача с id # %d не существует.%n", idForAction);
-                    }
+                    case16(manager, scanner);
                     break;
 
                 case 17:
-                    System.out.print("Введите id подзадачи для удаления: ");
-                    idForAction = Integer.parseInt(scanner.next());
-
-                    if (manager.getSubtasks().containsKey(idForAction)) {
-                        manager.deleteSubtask(idForAction);
-                    } else {
-                        System.out.printf("Задача с id # %d не существует.%n", idForAction);
-                    }
+                    case17(manager, scanner);
                     break;
 
                 case 18:
@@ -238,18 +116,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
                     break;
 
                 case 22:
-                    try {
-                        if (currentStatus == null) {
-                            throw new ManagerSaveException("Объект класса File для сохранения информации не инициализирован.");
-                        } else {
-                            manager = Managers.getSavedFileBackedTasksManager(currentStatus);
-                        }
-                    } catch (ManagerSaveException e) {
-                        System.out.println(e.getMessage());
-                    } catch (IOException e) {
-                        System.out.println("Произошла неизвестная проверяемая ошибка ввода-вывода класса IOException.");
-                        e.printStackTrace();
-                    }
+                    manager = case22(currentStatus);
                     break;
 
                 default:
@@ -258,6 +125,197 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
             }
             printInfo();
             userCommand = Integer.parseInt(scanner.next());
+        }
+    }
+
+    private static void case1(TaskManager manager) throws URISyntaxException, IOException, InterruptedException {
+        manager.createTask(new Task(null, Types.TASK,"Переезд", Status.NEW,
+                LocalDateTime.of(2022, Month.NOVEMBER, 28, 10,00),
+                Duration.ofMinutes(480),"собрать коробки; упаковать кошку; сказать слова прощания"));
+
+        manager.createTask(new Task(null, Types.TASK,"Покупки", Status.NEW,
+                LocalDateTime.of(2022, Month.NOVEMBER, 29, 10,00),
+                Duration.ofMinutes(45),"молоко; кофе; яйца"));
+    }
+
+    private static void case2(TaskManager manager, Scanner scanner) throws URISyntaxException, IOException, InterruptedException {
+        if (manager.getTasks().size() != 0) {
+            System.out.print("Введите id задачи для обновления: ");
+            Integer idForAction = Integer.parseInt(scanner.next());
+
+            if ((manager.getTasks().containsKey(idForAction)) && (manager.getTasks().get(idForAction) != null)) {
+                manager.updateTask(new Task(null, Types.TASK,"Покупки", Status.DONE,
+                        LocalDateTime.of(2022, Month.NOVEMBER, 29, 10,00),
+                        Duration.ofMinutes(60),"молоко; кофе; яйца; хлеб"), idForAction);
+            } else {
+                System.out.printf("Задача с id # %d не существует.%n", idForAction);
+            }
+        } else {
+            System.out.println("Список задач пуст => нечего обновлять.");
+        }
+    }
+
+    private static void case3(TaskManager manager, Scanner scanner) throws URISyntaxException, IOException, InterruptedException {
+        System.out.print("Введите id задачи для отображения: ");
+        Integer idForAction = Integer.parseInt(scanner.next());
+
+        if (manager.getTasks().containsKey(idForAction)) {
+            manager.printTask(idForAction);
+        } else {
+            System.out.printf("Задача с id # %d не существует.%n", idForAction);
+        }
+    }
+
+    private static void case4(TaskManager manager, Scanner scanner) throws URISyntaxException, IOException, InterruptedException {
+        System.out.print("Введите id задачи для удаления: ");
+        Integer idForAction = Integer.parseInt(scanner.next());
+
+        if (manager.getTasks().containsKey(idForAction)) {
+            manager.deleteTask(idForAction);
+        } else {
+            System.out.printf("Задача с id # %d не существует.%n", idForAction);
+        }
+    }
+
+    private static void case7(TaskManager manager) throws URISyntaxException, IOException, InterruptedException {
+        manager.createEpic(new Epic(null, Types.EPIC,"Java developer. Модуль #1", null,
+                        null,null, null,"спринт #1; спринт #2", null),
+                new Subtask(null, null, Types.SUBTASK,"Спринт #1", Status.DONE,
+                        LocalDateTime.of(2022, Month.NOVEMBER, 30, 10, 00),
+                        Duration.ofMinutes(7200),"пройти теорию; создать счетчик калорий"),
+                new Subtask(null, null, Types.SUBTASK,"Спринт #2", Status.DONE,
+                        LocalDateTime.of(2022, Month.DECEMBER, 05, 10, 01),
+                        Duration.ofMinutes(7200),"пройти теорию; автоматизировать бухгалтерию"));
+
+        manager.createEpic(new Epic(null, Types.EPIC,"Java developer. Модуль #1",null,
+                        null,null,null,"спринт #3", null),
+                new Subtask(null, null, Types.SUBTASK,"Спринт #3", Status.IN_PROGRESS,
+                        LocalDateTime.of(2022, Month.DECEMBER, 12, 10, 00),
+                        Duration.ofMinutes(7200),"пройти теорию; создать трекер задач"));
+    }
+
+    private static void case8(TaskManager manager, Scanner scanner) throws URISyntaxException, IOException, InterruptedException {
+        System.out.print("Введите id эпика для обновления: ");
+        Integer idForAction = Integer.parseInt(scanner.next());
+
+        if (manager.getEpics().containsKey(idForAction)) {
+            manager.updateEpic(new Epic(null, Types.EPIC, "Java developer. Модуль #1", null,
+                            null,null,null,
+                            "спринт #3; спринт #4", null),
+                    new Subtask(null, null, Types.SUBTASK,"Спринт #3", Status.DONE,
+                            LocalDateTime.of(2022, Month.DECEMBER, 19, 10, 00),
+                            Duration.ofMinutes(7200),"пройти теорию; создать трекер задач"),
+                    new Subtask(null, null, Types.SUBTASK,"Спринт #4", Status.NEW,
+                            LocalDateTime.of(2022, Month.DECEMBER, 26, 10, 00),
+                            Duration.ofMinutes(7200),"пройти теорию; доработать трекер задач"),
+                    idForAction);
+        } else {
+            System.out.printf("Эпик c id # %d не существует.%n", idForAction);
+        }
+    }
+
+    private static void case9(TaskManager manager, Scanner scanner) throws URISyntaxException, IOException, InterruptedException {
+        System.out.print("Введите id эпика для отображения: ");
+        Integer idForAction = Integer.parseInt(scanner.next());
+
+        if (manager.getEpics().containsKey(idForAction)) {
+            manager.printEpic(idForAction);
+        } else {
+            System.out.printf("Эпик с id # %d не существует.%n", idForAction);
+        }
+    }
+
+    private static void case10(TaskManager manager, Scanner scanner) throws URISyntaxException, IOException, InterruptedException {
+        System.out.print("Введите id эпика для удаления: ");
+        Integer idForAction = Integer.parseInt(scanner.next());
+
+        if (manager.getEpics().containsKey(idForAction)) {
+            manager.deleteEpic(idForAction);
+        } else {
+            System.out.printf("Эпик c id # %d не существует.%n", idForAction);
+        }
+    }
+
+    private static void case13(TaskManager manager, Scanner scanner) {
+        System.out.print("Введите id эпика: ");
+        Integer idForAction = Integer.parseInt(scanner.next());
+
+        if ((manager.getEpics().get(idForAction) != null) &&
+                (manager.getEpics().get(idForAction).getSubtaskIds() != null)) {
+            manager.printEpicSubtaskList(idForAction);
+        } else {
+            System.out.println("Список подзадач пуст.");
+        }
+    }
+
+    private static void case14(TaskManager manager, Scanner scanner) throws URISyntaxException, IOException, InterruptedException {
+        System.out.print("Введите id эпика для добавления новой подзадачи: ");
+        Integer idForAction = Integer.parseInt(scanner.next());
+
+        if (manager.getEpics().get(idForAction) != null) {
+            manager.createSubtask(new Subtask(null, null, Types.SUBTASK,"Спринт #5", Status.NEW,
+                    LocalDateTime.of(2022, Month.DECEMBER, 26, 10, 00),
+                    Duration.ofMinutes(7200),"пройти теорию; снова доработать трекер задач"), idForAction);
+        } else {
+            System.out.printf("Эпик с id # %d не существует.%n", idForAction);
+        }
+    }
+
+    private static void case15(TaskManager manager, Scanner scanner) throws URISyntaxException, IOException, InterruptedException {
+        System.out.print("Введите id эпика: ");
+        Integer epicIdForAction = Integer.parseInt(scanner.next());
+
+        System.out.print("Введите id задачи для обновления: ");
+        Integer subtaskIdForAction = Integer.parseInt(scanner.next());
+
+        if ((manager.getEpics().get(epicIdForAction) != null) &&
+                (manager.getSubtasks().get(subtaskIdForAction) != null)) {
+            manager.updateSubtask(new Subtask(null, null, Types.SUBTASK,"Спринт #3", Status.DONE,
+                            LocalDateTime.of(2022, Month.DECEMBER, 12, 10, 00),
+                            Duration.ofMinutes(7200),"пройти теорию; создать трекер задач"),
+                    epicIdForAction, subtaskIdForAction);
+        } else {
+            System.out.println("Указанные эпик или подзадача не существуют.");
+        }
+    }
+
+    private static void case16(TaskManager manager, Scanner scanner) throws URISyntaxException, IOException, InterruptedException {
+        System.out.print("Введите id позадачи для отображения: ");
+        Integer idForAction = Integer.parseInt(scanner.next());
+
+        if (manager.getSubtasks().containsKey(idForAction)) {
+            manager.printSubtask(idForAction);
+        } else {
+            System.out.printf("Задача с id # %d не существует.%n", idForAction);
+        }
+    }
+
+    private static void case17(TaskManager manager, Scanner scanner) throws URISyntaxException, IOException, InterruptedException {
+        System.out.print("Введите id подзадачи для удаления: ");
+        Integer idForAction = Integer.parseInt(scanner.next());
+
+        if (manager.getSubtasks().containsKey(idForAction)) {
+            manager.deleteSubtask(idForAction);
+        } else {
+            System.out.printf("Задача с id # %d не существует.%n", idForAction);
+        }
+    }
+
+    private static TaskManager case22(File currentStatus) throws ManagerSaveException, IOException {
+        try {
+            if (currentStatus == null) {
+                throw new ManagerSaveException("Объект класса File для сохранения информации не инициализирован.");
+            } else {
+                TaskManager manager = Managers.getSavedFileBackedTasksManager(currentStatus);
+                return manager;
+            }
+        } catch (ManagerSaveException e) {
+            System.out.println(e.getMessage());
+            return null;
+        } catch (IOException e) {
+            System.out.println("Произошла неизвестная проверяемая ошибка ввода-вывода класса IOException.");
+            e.printStackTrace();
+            return null;
         }
     }
 

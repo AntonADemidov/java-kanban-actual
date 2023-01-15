@@ -34,7 +34,7 @@ public class KVTaskClient {
     }
 
     public void put(String key, String json) throws URISyntaxException, IOException, InterruptedException {
-        String toDO = "/save/" + key + "?API_TOKEN=" + apiToken;
+        String toDO = String.format("/save/%s?API_TOKEN=%S", key, apiToken);
         URI action = new URI(uri + toDO);
 
         HttpRequest.BodyPublisher publisher = HttpRequest.BodyPublishers.ofString(json);
@@ -50,7 +50,7 @@ public class KVTaskClient {
     }
 
     public String load(String key) throws URISyntaxException, IOException, InterruptedException {
-        String toDO = "/load/" + key + "?API_TOKEN=" + apiToken;
+        String toDO = String.format("/load/%s?API_TOKEN=%S", key, apiToken);
         URI action = new URI(uri + toDO);
 
         HttpRequest request = HttpRequest.newBuilder()
@@ -66,5 +66,3 @@ public class KVTaskClient {
         return response.body();
     }
 }
-
-

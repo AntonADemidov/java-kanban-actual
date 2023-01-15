@@ -1,9 +1,9 @@
 package servers;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
-
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -12,6 +12,7 @@ import com.sun.net.httpserver.HttpServer;
 
 public class KVServer {
     public static final int PORT = 8078;
+    private static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
     private final String apiToken;
     private final HttpServer server;
     private final Map<String, String> data = new HashMap<>();
@@ -27,7 +28,7 @@ public class KVServer {
     public static void main(String[] args) throws IOException {
             KVServer kvServer = new KVServer();
             kvServer.start();
-            kvServer.stop();
+            //kvServer.stop();
         }
 
     private void load(HttpExchange h) throws IOException {
@@ -48,7 +49,7 @@ public class KVServer {
 
                 if (data.containsKey(key)) {
                     String value = data.get(key);
-                    System.out.println("Значение value для ключа " + key + " найдено:");
+                    System.out.printf("Значение value для ключа %s найдено", key);
                     System.out.println(value);
                     sendText(h, value);
                 } else {
@@ -56,7 +57,7 @@ public class KVServer {
                     sendText(h, value, 400);
                 }
             } else {
-                System.out.println("/save ждёт POST-запрос, а получил: " + h.getRequestMethod());
+                System.out.printf("/save ждёт POST-запрос, а получил: %s", h.getRequestMethod());
                 h.sendResponseHeaders(405, 0);
             }
         } finally {
@@ -86,10 +87,10 @@ public class KVServer {
                     return;
                 }
                 data.put(key, value);
-                System.out.println("Значение для ключа " + key + " успешно обновлено!");
+                System.out.printf("Сохранено значение для ключа %s:\n%s", key, value);
                 h.sendResponseHeaders(200, 0);
             } else {
-                System.out.println("/save ждёт POST-запрос, а получил: " + h.getRequestMethod());
+                System.out.printf("/save ждёт POST-запрос, а получил: %s\n", h.getRequestMethod());
                 h.sendResponseHeaders(405, 0);
             }
         } finally {
@@ -101,10 +102,10 @@ public class KVServer {
         try {
             System.out.println("\n/register");
             if ("GET".equals(h.getRequestMethod())) {
-                System.out.println("API_TOKEN=" + apiToken);
+                System.out.printf("API_TOKEN=%s\n", apiToken);
                 sendText(h, apiToken);
             } else {
-                System.out.println("/register ждёт GET-запрос, а получил " + h.getRequestMethod());
+                System.out.printf("/register ждёт GET-запрос, а получил %s", h.getRequestMethod());
                 h.sendResponseHeaders(405, 0);
             }
         } finally {
@@ -113,9 +114,9 @@ public class KVServer {
     }
 
     public void start() {
-        System.out.println("Запускаем сервер на порту " + PORT);
-        System.out.println("Открой в браузере http://localhost:" + PORT + "/");
-        System.out.println("API_TOKEN: " + apiToken);
+        System.out.printf("Запускаем сервер на порту %s\n", PORT);
+        System.out.printf("Открой в браузере http://localhost:%s/\n", PORT);
+        System.out.printf("API_TOKEN: %s\n", apiToken);
         server.start();
     }
 
@@ -131,22 +132,22 @@ public class KVServer {
     protected boolean hasAuth(HttpExchange h) {
         String rawQuery = h.getRequestURI().getRawQuery();
         System.out.println(rawQuery);
-        return rawQuery != null && (rawQuery.contains("API_TOKEN=" + apiToken) || rawQuery.contains("API_TOKEN=DEBUG"));
+        return rawQuery != null && (rawQuery.contains(String.format("API_TOKEN=%s", apiToken)) || rawQuery.contains("API_TOKEN=DEBUG"));
     }
 
     protected String readText(HttpExchange h) throws IOException {
-        return new String(h.getRequestBody().readAllBytes(), UTF_8);
+        return new String(h.getRequestBody().readAllBytes(), DEFAULT_CHARSET);
     }
 
     protected void sendText(HttpExchange h, String text) throws IOException {
-        byte[] resp = text.getBytes(UTF_8);
+        byte[] resp = text.getBytes(DEFAULT_CHARSET);
         h.getResponseHeaders().add("Content-Type", "application/json");
         h.sendResponseHeaders(200, resp.length);
         h.getResponseBody().write(resp);
     }
 
     protected void sendText(HttpExchange h, String text, int rCode) throws IOException {
-        byte[] resp = text.getBytes(UTF_8);
+        byte[] resp = text.getBytes(DEFAULT_CHARSET);
         h.getResponseHeaders().add("Content-Type", "application/json");
         h.sendResponseHeaders(rCode, resp.length);
         h.getResponseBody().write(resp);

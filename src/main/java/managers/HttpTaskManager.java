@@ -47,7 +47,6 @@ public class HttpTaskManager extends FileBackedTasksManager {
         }
 
         json = kvTaskClient.load("epics");
-
         if (json.equals("NO DATA")) {
             System.out.println("Задачи типа EPIC не сохранялись на KVServer");
         } else {
@@ -61,7 +60,6 @@ public class HttpTaskManager extends FileBackedTasksManager {
         }
 
         json = kvTaskClient.load("subtasks");
-
         if (json.equals("NO DATA")) {
             System.out.println("Задачи типа SUBTASK не сохранялись на KVServer");
         } else {
